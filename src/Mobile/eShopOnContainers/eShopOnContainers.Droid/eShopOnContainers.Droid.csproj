@@ -218,6 +218,9 @@
     <Reference Include="Autofac">
       <HintPath>..\..\..\..\packages\Autofac.4.5.0\lib\netstandard1.1\Autofac.dll</HintPath>
     </Reference>
+    <Reference Include="Xamarin.Android.Support.CustomTabs">
+      <HintPath>..\..\..\..\packages\Xamarin.Android.Support.CustomTabs.23.3.0\lib\MonoAndroid403\Xamarin.Android.Support.CustomTabs.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activities\MainActivity.cs" />
@@ -234,6 +237,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Effects\CircleEffect.cs" />
     <Compile Include="Effects\BaseContainerEffect.cs" />
+    <Compile Include="Activities\CustomURLSchemeInterceptorActivity.cs" />
+    <Compile Include="Controls\ChromeCustomTabsWebView.cs" />
+    <Compile Include="Services\NativeBrowserService.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="..\CommonResources\Fonts\Montserrat-Bold.ttf">
@@ -392,6 +398,10 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\default_campaign.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controls\" />
+    <Folder Include="Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\..\..\..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />

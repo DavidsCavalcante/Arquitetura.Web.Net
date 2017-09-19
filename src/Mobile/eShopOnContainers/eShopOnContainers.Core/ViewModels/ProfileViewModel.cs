@@ -36,7 +36,7 @@ namespace eShopOnContainers.Core.ViewModels
 
         public ICommand OrderDetailCommand => new Command<Order>(async (order) => await OrderDetailAsync(order));
 
-        public override async Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
             IsBusy = true;
 
@@ -46,6 +46,8 @@ namespace eShopOnContainers.Core.ViewModels
             Orders = orders.ToObservableCollection();
 
             IsBusy = false;
+
+            return base.InitializeAsync(navigationData);
         }
 
         private async Task LogoutAsync()

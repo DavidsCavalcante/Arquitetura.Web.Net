@@ -333,7 +333,7 @@
                 </Grid.GestureRecognizers>
             </Grid>
             <!-- WEBVIEW -->
-            <AbsoluteLayout
+<!--            <AbsoluteLayout
                 Grid.Column="0"
                 Grid.ColumnSpan="3"
                 Grid.Row="0"
@@ -366,7 +366,7 @@
                         </OnPlatform>
                     </WebView.Behaviors>
                 </WebView>
-            </AbsoluteLayout>
+            </AbsoluteLayout>-->
         </Grid>
         <!-- INDICATOR -->
         <ActivityIndicator      

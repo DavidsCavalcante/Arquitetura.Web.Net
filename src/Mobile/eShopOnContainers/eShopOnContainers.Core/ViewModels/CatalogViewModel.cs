@@ -80,9 +80,9 @@ namespace eShopOnContainers.Core.ViewModels
 
         public ICommand FilterCommand => new Command(async () => await FilterAsync());
 
-		public ICommand ClearFilterCommand => new Command(async () => await ClearFilterAsync());
+        public ICommand ClearFilterCommand => new Command(async () => await ClearFilterAsync());
 
-        public override async Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
             IsBusy = true;
 
@@ -92,6 +92,8 @@ namespace eShopOnContainers.Core.ViewModels
             Types = await _productsService.GetCatalogTypeAsync();
 
             IsBusy = false;
+
+            return base.InitializeAsync(navigationData);
         }
 
         private void AddCatalogItem(CatalogItem catalogItem)

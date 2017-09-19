@@ -39,12 +39,12 @@
         public async Task<ObservableCollection<CampaignItem>> GetAllCampaignsAsync(string token)
         {
             await Task.Delay(500);
-
             return _mockCampaign;
         }
 
         public async Task<CampaignItem> GetCampaignByIdAsync(int campaignId, string token)
         {
+            await Task.Delay(500);
             return _mockCampaign.SingleOrDefault(c => c.Id == campaignId);
         }
     }

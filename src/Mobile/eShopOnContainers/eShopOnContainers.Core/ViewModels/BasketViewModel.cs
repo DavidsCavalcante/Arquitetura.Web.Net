@@ -48,7 +48,7 @@ namespace eShopOnContainers.Core.ViewModels
                 RaisePropertyChanged(() => BasketItems);
             }
         }
-         
+
         public decimal Total
         {
             get { return _total; }
@@ -63,7 +63,7 @@ namespace eShopOnContainers.Core.ViewModels
 
         public ICommand CheckoutCommand => new Command(async () => await CheckoutAsync());
 
-        public override async Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
             if (BasketItems == null)
                 BasketItems = new ObservableCollection<BasketItem>();
@@ -93,8 +93,8 @@ namespace eShopOnContainers.Core.ViewModels
 
                 await AddCatalogItemAsync(arg);
             });
-            
-            await base.InitializeAsync(navigationData);
+
+            return base.InitializeAsync(navigationData);
         }
 
         private async Task AddCatalogItemAsync(CatalogItem item)
@@ -146,7 +146,7 @@ namespace eShopOnContainers.Core.ViewModels
 
             await _basketService.UpdateBasketAsync(new CustomerBasket
             {
-                BuyerId = userInfo.UserId, 
+                BuyerId = userInfo.UserId,
                 Items = BasketItems.ToList()
             }, authToken);
         }

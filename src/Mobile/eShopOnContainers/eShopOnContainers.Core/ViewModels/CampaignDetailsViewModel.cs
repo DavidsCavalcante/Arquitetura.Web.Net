@@ -39,17 +39,18 @@
             }
         }
 
-        public override async Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
             if (navigationData is int)
             {
                 IsBusy = true;
 
                 // Get campaign by id
-                Campaign = await _campaignService.GetCampaignByIdAsync((int) navigationData, Settings.AuthAccessToken);
+                Campaign = await _campaignService.GetCampaignByIdAsync((int)navigationData, Settings.AuthAccessToken);
 
-                IsBusy = false;  
+                IsBusy = false;
             }
+            return base.InitializeAsync(navigationData);
         }
 
         public ICommand EnableDetailsSiteCommand => new Command(EnableDetailsSite);

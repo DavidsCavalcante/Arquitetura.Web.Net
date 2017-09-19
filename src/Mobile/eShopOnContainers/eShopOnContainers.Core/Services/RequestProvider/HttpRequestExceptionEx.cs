@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eShopOnContainers.Core.Services.RequestProvider
 {
@@ -14,7 +10,7 @@ namespace eShopOnContainers.Core.Services.RequestProvider
         {
         }
 
-        public HttpRequestExceptionEx(System.Net.HttpStatusCode code, string message) : this (code, message, null)
+        public HttpRequestExceptionEx(System.Net.HttpStatusCode code, string message) : this(code, message, null)
         {
         }
 

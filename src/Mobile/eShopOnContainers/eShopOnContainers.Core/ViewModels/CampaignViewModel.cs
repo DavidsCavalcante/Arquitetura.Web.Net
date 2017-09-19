@@ -31,7 +31,7 @@
 
         public ICommand GetCampaignDetailsCommand => new Command<CampaignItem>(async (item) => await GetCampaignDetails(item));
 
-        public override async Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
             IsBusy = true;
 
@@ -39,6 +39,8 @@
             Campaigns = await _campaignService.GetAllCampaignsAsync(Settings.AuthAccessToken);
 
             IsBusy = false;
+
+            return base.InitializeAsync(navigationData);
         }
 
         private async Task GetCampaignDetails(CampaignItem campaign)

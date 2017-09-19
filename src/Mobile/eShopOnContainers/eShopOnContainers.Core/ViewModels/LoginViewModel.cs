@@ -1,9 +1,10 @@
 ﻿using eShopOnContainers.Core.Helpers;
 using eShopOnContainers.Core.Models.User;
+using eShopOnContainers.Core.Services.Dependency;
 using eShopOnContainers.Core.Services.Identity;
-using eShopOnContainers.Core.Services.OpenUrl;
 using eShopOnContainers.Core.Validations;
 using eShopOnContainers.Core.ViewModels.Base;
+using eShopOnContainers.Core.Extensions;
 using IdentityModel.Client;
 using System;
 using System.Diagnostics;
@@ -19,18 +20,18 @@ namespace eShopOnContainers.Core.ViewModels
         private ValidatableObject<string> _password;
         private bool _isMock;
         private bool _isValid;
-        private bool _isLogin;
-        private string _authUrl;
+        //private bool _isLogin;
+        //private string _authUrl;
 
-        private IOpenUrlService _openUrlService;
         private IIdentityService _identityService;
+        private IDependencyService _dependencyService;
 
         public LoginViewModel(
-            IOpenUrlService openUrlService,
-            IIdentityService identityService)
+            IIdentityService identityService,
+            IDependencyService dependencyService)
         {
-            _openUrlService = openUrlService;
             _identityService = identityService;
+            _dependencyService = dependencyService;
 
             _userName = new ValidatableObject<string>();
             _password = new ValidatableObject<string>();
@@ -91,55 +92,54 @@ namespace eShopOnContainers.Core.ViewModels
             }
         }
 
-        public bool IsLogin
-        {
-            get
-            {
-                return _isLogin;
-            }
-            set
-            {
-                _isLogin = value;
-                RaisePropertyChanged(() => IsLogin);
-            }
-        }
+        //public bool IsLogin
+        //{
+        //    get
+        //    {
+        //        return _isLogin;
+        //    }
+        //    set
+        //    {
+        //        _isLogin = value;
+        //        RaisePropertyChanged(() => IsLogin);
+        //    }
+        //}
 
-        public string LoginUrl
-        {
-            get
-            {
-                return _authUrl;
-            }
-            set
-            {
-                _authUrl = value;
-                RaisePropertyChanged(() => LoginUrl);
-            }
-        }
+        //public string LoginUrl
+        //{
+        //    get
+        //    {
+        //        return _authUrl;
+        //    }
+        //    set
+        //    {
+        //        _authUrl = value;
+        //        RaisePropertyChanged(() => LoginUrl);
+        //    }
+        //}
 
         public ICommand MockSignInCommand => new Command(async () => await MockSignInAsync());
 
         public ICommand SignInCommand => new Command(async () => await SignInAsync());
 
-        public ICommand RegisterCommand => new Command(Register);
+        public ICommand RegisterCommand => new Command(async () => await RegisterAsync());
 
-        public ICommand NavigateCommand => new Command<string>(async (url) => await NavigateAsync(url));
+        //public ICommand NavigateCommand => new Command<string>(async (url) => await NavigateAsync(url));
 
         public ICommand SettingsCommand => new Command(async () => await SettingsAsync());
 
-		public ICommand ValidateUserNameCommand => new Command(() => ValidateUserName());
+        public ICommand ValidateUserNameCommand => new Command(() => ValidateUserName());
 
-		public ICommand ValidatePasswordCommand => new Command(() => ValidatePassword());
+        public ICommand ValidatePasswordCommand => new Command(() => ValidatePassword());
 
-        public override Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
-            if(navigationData is LogoutParameter)
+            if (navigationData is LogoutParameter)
             {
                 var logoutParameter = (LogoutParameter)navigationData;
-
                 if (logoutParameter.Logout)
                 {
-                    Logout();
+                    await LogoutAsync();
                 }
             }
 
@@ -184,71 +184,97 @@ namespace eShopOnContainers.Core.ViewModels
 
         private async Task SignInAsync()
         {
-            IsBusy = true;
+            //IsBusy = true;
 
-            await Task.Delay(500);
+            //await Task.Delay(500);
 
-            LoginUrl = _identityService.CreateAuthorizationRequest();
+            var result = await _dependencyService.Get<INativeBrowserService>().LaunchBrowserAsync(_identityService.CreateAuthorizationRequest());
+            if (!result.IsError)
+            {
+                var unescapedUrl = System.Net.WebUtility.UrlDecode(result.Response);
+                if (unescapedUrl.Contains(GlobalSetting.Instance.IdentityCallback))
+                {
+                    var authResponse = new AuthorizeResponse(result.Response);
+                    if (!authResponse.IsError && authResponse.Code.IsPresent())
+                    {
+                        var userToken = await _identityService.GetTokenAsync(authResponse.Code);
+                        if (userToken.AccessToken.IsPresent())
+                        {
+                            Settings.AuthAccessToken = userToken.AccessToken;
+                            Settings.AuthIdToken = authResponse.IdentityToken;
+                            await NavigationService.NavigateToAsync<MainViewModel>();
+                            await NavigationService.RemoveLastFromBackStackAsync();
+                        }
+                    }
+                }
+            }
 
-            IsValid = true;
-            IsLogin = true;
-            IsBusy = false;
+            //IsValid = true;
+            //IsLogin = true;
+            //IsBusy = false;
         }
 
-        private void Register()
+        private async Task RegisterAsync()
         {
-            _openUrlService.OpenUrl(GlobalSetting.Instance.RegisterWebsite);
+            await _dependencyService.Get<INativeBrowserService>().LaunchBrowserAsync(GlobalSetting.Instance.RegisterWebsite);
         }
 
-        private void Logout()
+        private async Task LogoutAsync()
         {
             var authIdToken = Settings.AuthIdToken;
             var logoutRequest = _identityService.CreateLogoutRequest(authIdToken);
 
-            if (!string.IsNullOrEmpty(logoutRequest))
+            if (!string.IsNullOrWhiteSpace(logoutRequest))
             {
-                // Logout
-                LoginUrl = logoutRequest;
+                var result = await _dependencyService.Get<INativeBrowserService>().LaunchBrowserAsync(logoutRequest);
+                if (!result.IsError)
+                {
+                    var unescapedUrl = System.Net.WebUtility.UrlDecode(result.Response);
+                    if (unescapedUrl.Equals(GlobalSetting.Instance.LogoutCallback))
+                    {
+                        Settings.AuthAccessToken = string.Empty;
+                        Settings.AuthIdToken = string.Empty;
+                    }
+                }
             }
 
             if (Settings.UseMocks)
             {
                 Settings.AuthAccessToken = string.Empty;
-                Settings.AuthIdToken = string.Empty; 
+                Settings.AuthIdToken = string.Empty;
             }
-
             Settings.UseFakeLocation = false;
         }
 
-        private async Task NavigateAsync(string url)
-        {
-            var unescapedUrl = System.Net.WebUtility.UrlDecode(url);
+        //private async Task NavigateAsync(string url)
+        //{
+        //    var unescapedUrl = System.Net.WebUtility.UrlDecode(url);
 
-            if (unescapedUrl.Equals(GlobalSetting.Instance.LogoutCallback))
-            {
-                Settings.AuthAccessToken = string.Empty;
-                Settings.AuthIdToken = string.Empty;
-                IsLogin = false;
-                LoginUrl = _identityService.CreateAuthorizationRequest();
-            }
-            else if (unescapedUrl.Contains(GlobalSetting.Instance.IdentityCallback))
-            {
-                var authResponse = new AuthorizeResponse(url);
-                if (!string.IsNullOrWhiteSpace(authResponse.Code))
-                {
-                    var userToken = await _identityService.GetTokenAsync(authResponse.Code);
-                    string accessToken = userToken.AccessToken;
+        //    if (unescapedUrl.Equals(GlobalSetting.Instance.LogoutCallback))
+        //    {
+        //        Settings.AuthAccessToken = string.Empty;
+        //        Settings.AuthIdToken = string.Empty;
+        //        IsLogin = false;
+        //        LoginUrl = _identityService.CreateAuthorizationRequest();
+        //    }
+        //    else if (unescapedUrl.Contains(GlobalSetting.Instance.IdentityCallback))
+        //    {
+        //        var authResponse = new AuthorizeResponse(url);
+        //        if (!string.IsNullOrWhiteSpace(authResponse.Code))
+        //        {
+        //            var userToken = await _identityService.GetTokenAsync(authResponse.Code);
+        //            string accessToken = userToken.AccessToken;
 
-                    if (!string.IsNullOrWhiteSpace(accessToken))
-                    {
-                        Settings.AuthAccessToken = accessToken;
-                        Settings.AuthIdToken = authResponse.IdentityToken;
-                        await NavigationService.NavigateToAsync<MainViewModel>();
-                        await NavigationService.RemoveLastFromBackStackAsync();
-                    }
-                }
-            }
-        }
+        //            if (!string.IsNullOrWhiteSpace(accessToken))
+        //            {
+        //                Settings.AuthAccessToken = accessToken;
+        //                Settings.AuthIdToken = authResponse.IdentityToken;
+        //                await NavigationService.NavigateToAsync<MainViewModel>();
+        //                await NavigationService.RemoveLastFromBackStackAsync();
+        //            }
+        //        }
+        //    }
+        //}
 
         private async Task SettingsAsync()
         {
@@ -257,21 +283,21 @@ namespace eShopOnContainers.Core.ViewModels
 
         private bool Validate()
         {
-			bool isValidUser = ValidateUserName();
+            bool isValidUser = ValidateUserName();
             bool isValidPassword = ValidatePassword();
 
             return isValidUser && isValidPassword;
         }
 
-		private bool ValidateUserName()
-		{
-			return _userName.Validate();
-		}
+        private bool ValidateUserName()
+        {
+            return _userName.Validate();
+        }
 
-		private bool ValidatePassword()
-		{
-			return _password.Validate();
-		}
+        private bool ValidatePassword()
+        {
+            return _password.Validate();
+        }
 
         private void AddValidations()
         {

@@ -12,7 +12,7 @@ namespace eShopOnContainers.Core.ViewModels
     public class OrderDetailViewModel : ViewModelBase
     {
         private readonly IOrderService _ordersService;
-		private Order _order;
+        private Order _order;
         private bool _isSubmittedOrder;
         private string _orderStatusText;
 
@@ -54,7 +54,7 @@ namespace eShopOnContainers.Core.ViewModels
 
         public ICommand ToggleCancelOrderCommand => new Command(async () => await ToggleCancelOrderAsync());
 
-        public override async Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
             if (navigationData is Order)
             {
@@ -70,6 +70,7 @@ namespace eShopOnContainers.Core.ViewModels
 
                 IsBusy = false;
             }
+            return base.InitializeAsync(navigationData);
         }
 
         private async Task ToggleCancelOrderAsync()
@@ -80,7 +81,7 @@ namespace eShopOnContainers.Core.ViewModels
 
             if (result)
             {
-                OrderStatusText = OrderStatus.Cancelled.ToString().ToUpper();  
+                OrderStatusText = OrderStatus.Cancelled.ToString().ToUpper();
             }
             else
             {

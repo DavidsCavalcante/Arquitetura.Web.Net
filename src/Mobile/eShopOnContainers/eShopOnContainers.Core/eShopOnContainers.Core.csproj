@@ -106,8 +106,6 @@
     <Compile Include="Services\Marketing\CampaignService.cs" />
     <Compile Include="Services\Navigation\INavigationService.cs" />
     <Compile Include="Services\Navigation\NavigationService.cs" />
-    <Compile Include="Services\OpenUrl\IOpenUrlService.cs" />
-    <Compile Include="Services\OpenUrl\OpenUrlService.cs" />
     <Compile Include="Services\Order\IOrderService.cs" />
     <Compile Include="Services\Order\OrderMockService.cs" />
     <Compile Include="Services\Order\OrderService.cs" />
@@ -193,6 +191,12 @@
     <Compile Include="Behaviors\LineColorBehavior.cs" />
     <Compile Include="Models\Token\UserToken.cs" />
     <Compile Include="Effects\ThemeEffects.cs" />
+    <Compile Include="Services\Dependency\DependencyService.cs" />
+    <Compile Include="Services\Dependency\IDependencyService.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Models\Browser\BrowserResult.cs" />
+    <Compile Include="Models\Browser\BrowserResultType.cs" />
+    <Compile Include="Services\Dependency\INativeBrowserService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -303,6 +307,10 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\Dependency\" />
+    <Folder Include="Models\Browser\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

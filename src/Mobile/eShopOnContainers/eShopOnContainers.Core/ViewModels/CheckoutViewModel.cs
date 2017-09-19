@@ -20,7 +20,7 @@ namespace eShopOnContainers.Core.ViewModels
     {
         private ObservableCollection<BasketItem> _orderItems;
         private Order _order;
-        private Address _shippingAddress; 
+        private Address _shippingAddress;
 
         private IBasketService _basketService;
         private IOrderService _orderService;
@@ -68,7 +68,7 @@ namespace eShopOnContainers.Core.ViewModels
 
         public ICommand CheckoutCommand => new Command(async () => await CheckoutAsync());
 
-        public override async Task InitializeAsync(object navigationData)
+        public override async Task<object> InitializeAsync(object navigationData)
         {
             if (navigationData is ObservableCollection<BasketItem>)
             {
@@ -79,7 +79,7 @@ namespace eShopOnContainers.Core.ViewModels
 
                 OrderItems = orderItems;
 
-                var authToken = Settings.AuthAccessToken;       
+                var authToken = Settings.AuthAccessToken;
                 var userInfo = await _userService.GetUserInfoAsync(authToken);
 
                 // Create Shipping Address
@@ -98,7 +98,7 @@ namespace eShopOnContainers.Core.ViewModels
                 {
                     CardNumber = userInfo?.CardNumber,
                     CardHolderName = userInfo?.CardHolder,
-                    CardType = new CardType {  Id = 3, Name = "MasterCard" },
+                    CardType = new CardType { Id = 3, Name = "MasterCard" },
                     SecurityNumber = userInfo?.CardSecurityNumber
                 };
 
@@ -117,13 +117,15 @@ namespace eShopOnContainers.Core.ViewModels
                     ShippingState = _shippingAddress.State,
                     ShippingCountry = _shippingAddress.Country,
                     ShippingStreet = _shippingAddress.Street,
-                    ShippingCity = _shippingAddress.City,  
+                    ShippingCity = _shippingAddress.City,
                     ShippingZipCode = _shippingAddress.ZipCode,
                     Total = CalculateTotal(CreateOrderItems(orderItems))
                 };
 
                 IsBusy = false;
             }
+
+            return base.InitializeAsync(navigationData);
         }
 
         private async Task CheckoutAsync()
@@ -180,13 +182,13 @@ namespace eShopOnContainers.Core.ViewModels
             }
 
             return orderItems;
-        } 
+        }
 
         private decimal CalculateTotal(List<OrderItem> orderItems)
         {
             decimal total = 0;
 
-            foreach(var orderItem in orderItems)
+            foreach (var orderItem in orderItems)
             {
                 total += (orderItem.Quantity * orderItem.UnitPrice);
             }

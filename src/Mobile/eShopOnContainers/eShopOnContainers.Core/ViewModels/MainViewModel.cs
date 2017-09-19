@@ -10,7 +10,7 @@ namespace eShopOnContainers.Core.ViewModels
     {
         public ICommand SettingsCommand => new Command(async () => await SettingsAsync());
 
-        public override Task InitializeAsync(object navigationData)
+        public override Task<object> InitializeAsync(object navigationData)
         {
             IsBusy = true;
 

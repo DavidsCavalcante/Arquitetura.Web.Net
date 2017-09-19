@@ -32,9 +32,9 @@ namespace eShopOnContainers.Core.ViewModels.Base
             GlobalSetting.Instance.BaseEndpoint = Settings.UrlBase;
         }
 
-        public virtual Task InitializeAsync(object navigationData)
+        public virtual Task<object> InitializeAsync(object navigationData)
         {
-            return Task.FromResult(false);
+            return Task.FromResult((object)false);
         }
     }
 }
